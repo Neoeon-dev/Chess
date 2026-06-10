@@ -42,4 +42,6 @@ public:
 
     bool isLegalMove(const Move& move);
 
+    bool isValidIndex(int row, int col);
+
 };
