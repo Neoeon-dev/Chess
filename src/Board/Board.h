@@ -20,17 +20,17 @@ public:
 
     //Methods Declaration
 
-    int Occupied_Queen(std::array<std::array<Pieces, 8>, 8>&);
+    int Occupied_Queen(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
     int Occupied_King(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
-    int Occupied_Rook(std::array<std::array<Pieces, 8>, 8>&);
+    int Occupied_Rook(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
-    int Occupied_Knight(std::array<std::array<Pieces, 8>, 8>&);
+    int Occupied_Knight(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
-    int Occupied_Bishop(std::array<std::array<Pieces, 8>, 8>&);
+    int Occupied_Bishop(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
-    int Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>&);
+    int Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
     std::array<std::array<Pieces, 8>, 8> Occupied();
 
