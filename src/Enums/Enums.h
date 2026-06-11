@@ -37,7 +37,8 @@ enum Pieces{
     WQUEEN,
     BQUEEN,
     WKING,
-    BKING
+    BKING,
+    OCCUPIEDPIECE
 };
 
 enum Color{

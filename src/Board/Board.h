@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MoveState.h"
+#include <vector>
 
 class Board{
 public:
@@ -33,6 +34,10 @@ public:
     int Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
     std::array<std::array<Pieces, 8>, 8> Occupied();
+
+    int AttackFromSame(std::array<std::array<Pieces,8>,8>&, const Square&);
+
+    std::vector<int> Attackers(const Square& pos, int side);
 
     bool ischeck();
 
