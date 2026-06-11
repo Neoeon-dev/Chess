@@ -1,5 +1,60 @@
 #include "Board.h"
 
+//Helper functions
+
+std::vector<int> Board::Cross(const Square& pos,const Color& side){
+    std::vector<int> attackers;
+    int file = pos%8, rank = pos/8, URlimit = (rank > file)?(8-rank):(8-file), LLlimit = (rank > file)?file:rank, ULlimit = (rank + file < 8)?file: (8 - rank), LRlimit = (rank+file < 8)?rank:(8-file);
+    for(int i = 1;i<URlimit;i++){
+        if(board[rank+i][file+i] != EMPTY && board[rank+i][file+i] != OCCUPIED){
+            int index = (rank+i)*8 + (file + i);
+            if(board[rank+i][file+i] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[rank+i][file+i] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[rank+i][file+i] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[rank+i][file+i] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = 1;i<=LLlimit;i++){
+        if(board[rank-i][file-i] != EMPTY && board[rank-i][file-i] != OCCUPIED){
+            int index = (rank-i)*8 + (file - i), row = rank - i, col = file - i;
+            if(board[row][col] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[row][col] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = 1;i<=ULlimit;i++){
+        if(board[rank+i][file-i] != EMPTY && board[rank+i][file-i] != OCCUPIED){
+            int index = (rank+i)*8 + (file - i), row = rank + i, col = file - i;
+            if(board[row][col] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[row][col] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = 1;i <= LRlimit;i++){
+        if(board[rank-i][file+i] != EMPTY && board[rank-i][file+i] != OCCUPIED){
+            int index = (rank-i)*8 + (file + i), row = rank - i, col = file + i;
+            if(board[row][col] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[row][col] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    if(side == BLACK){
+        if(board[rank+1][file - 1] == WPAWN) attackers.push_back((rank+1)*8 + (file+1));
+        if(board[rank+1][file + 1] == WPAWN) attackers.push_back((rank+1)*8 + (file+1));
+    }
+    else{
+        if(board[rank-1][file-1] == BPAWN) attackers.push_back((rank+1)*8 + (file+1));
+        if(board[rank-1][file+1] == BPAWN) attackers.push_back((rank+1)*8 + (file+1));
+    }
+}
+
 
 //Constructors Definition
 
@@ -271,6 +326,96 @@ std::array<std::array<Pieces, 8>, 8> Board::Occupied(){
         }
     }
     return board_occupied;
+}
+
+//Attackers function
+
+std::vector<int> Board::Attackers(const Square& pos, Color side){
+    std::vector<int> attackers;
+    int file = pos%8, rank = pos/8, count = 0, URlimit = (rank > file)?(8-rank):(8-file), LLlimit = (rank > file)?file:rank, ULlimit = (rank + file < 8)?file: (8 - rank), LRlimit = (rank+file < 8)?rank:(8-file);
+    for(int i = 1;i<URlimit;i++){
+        if(isValidIndex(rank+i, file+i)){
+            count++;
+        }
+        if(board[rank+i][file+i] != EMPTY && board[rank+i][file+i] != OCCUPIED){
+            int index = (rank+i)*8 + (file + i);
+            if(board[rank+i][file+i] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[rank+i][file+i] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[rank+i][file+i] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[rank+i][file+i] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = 1;i<=LLlimit;i++){
+        if(isValidIndex(rank-i, file-i)){
+            count++;
+        }
+        if(board[rank-i][file-i] != EMPTY && board[rank-i][file-i] != OCCUPIED){
+            int index = (rank-i)*8 + (file - i), row = rank - i, col = file - i;
+            if(board[row][col] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[row][col] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = 1;i<=ULlimit;i++){
+        if(isValidIndex(rank+i, file-i)){
+            count++;
+        }
+        if(board[rank+i][file-i] != EMPTY && board[rank+i][file-i] != OCCUPIED){
+            int index = (rank+i)*8 + (file - i), row = rank + i, col = file - i;
+            if(board[row][col] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[row][col] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = 1;i <= LRlimit;i++){
+        if(isValidIndex(rank-i, file+i)){
+            count++;
+        }
+        if(board[rank-i][file+i] != EMPTY && board[rank-i][file+i] != OCCUPIED){
+            int index = (rank-i)*8 + (file + i), row = rank - i, col = file + i;
+            if(board[row][col] == WBISHOP && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BBISHOP && side == WHITE) attackers.push_back(index);
+            if(board[row][col] == WQUEEN && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BQUEEN && side == WHITE) attackers.push_back(index);
+            break;
+        }
+    }
+    for(int i = -1;i<1;i++){
+        if(i == 0) continue;
+        if(isValidIndex(rank + 2*i, file + i)){
+            count++;
+        }
+
+        if(isValidIndex(rank + i, file + 2*i)){
+            count++;
+        }
+        if(board[rank + i][file + 2*i] != EMPTY && board[rank + i][file + 2*i] != OCCUPIED){
+            int index = (rank+i)*8 + (file + 2*i), row = rank + i, col = file + 2*i;
+            if(board[row][col] == WKNIGHT && side == BLACK) attackers.push_back(index);
+            if(board[row][col] == BKNIGHT && side == WHITE) attackers.push_back(index);
+        }
+        if(board[rank + 2*i][file+i] != EMPTY && board[rank + 2*i][file + i] != OCCUPIED){
+        }
+    }
+    for(int i = -1;i<1;i++){
+        if(i == 0) continue;
+        if(isValidIndex(rank + 2*i, file - i)){
+            count++;
+        }
+        if(isValidIndex(rank + i, file - 2*i)){
+            count++;
+        }
+        if(board[rank + 2*i][file - i] != EMPTY && board[rank + 2*i][file - i] != OCCUPIED){
+        }
+        if(board[rank + i][file - 2*i] != EMPTY && board[rank + i][file - 2*i] != OCCUPIED){
+        }
+    }
+
 }
 
 //check funtions
