@@ -37,7 +37,7 @@ public:
 
     int AttackFromSame(std::array<std::array<Pieces,8>,8>&, const Square&);
 
-    std::vector<int> Attackers(const Square& pos, Color side);
+    std::vector<Square> Attackers(const Square& pos, Color side);
 
     bool ischeck();
 
@@ -53,9 +53,9 @@ public:
 
     //Helper Funtions
 
-    std::vector<int> Cross(const Square&,const Color&);
+    std::vector<Square> Cross(const Square&,const Color&);
 
-    std::vector<int> Plus(const Square&,const Color&);
+    std::vector<Square> Plus(const Square&,const Color&);
 
-    std::vector<int> L(const Square&,const Color&);
+    std::vector<Square> L(const Square&,const Color&);
 };
