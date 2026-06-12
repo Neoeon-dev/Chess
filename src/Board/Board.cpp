@@ -752,6 +752,7 @@ bool Board::isLegalMove(const Move& move){
     }
     Board new_board = movePiece(move);
     if(new_board.ischeck()) return false;
+    return true;
 }
 
 
