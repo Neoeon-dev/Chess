@@ -54,8 +54,8 @@ std::vector<Square> Board::Cross(const Square& pos,const Color& side){
         }
     }
     if(side == BLACK){
-        if(isValid(rank+1, file - 1) && board[rank+1][file - 1] == WPAWN) attackers.push_back((Square)((rank+1)*8 + (file-1)));
-        if(isValid(rank+1, file + 1) && board[rank+1][file + 1] == WPAWN) attackers.push_back((Square)((rank+1)*8 + (file+1)));
+        if(isValid(rank+1, file - 1) && board[rank-1][file - 1] == WPAWN) attackers.push_back((Square)((rank+1)*8 + (file-1)));
+        if(isValid(rank+1, file + 1) && board[rank-1][file + 1] == WPAWN) attackers.push_back((Square)((rank+1)*8 + (file+1)));
     }
     else{
         if(isValid(rank-1, file-1) && board[rank-1][file-1] == BPAWN) attackers.push_back((Square)((rank-1)*8 + (file-1)));
@@ -387,12 +387,11 @@ int Board::Occupied_Knight(std::array<std::array<Pieces, 8>, 8>& board_occupied,
     return 1;
 }
 
-int Board::Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>& board_occupied, const Square& pos){
-    int side = 1;
-    if(sideToMove == BLACK){
+int Board::Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>& board_occupied, const Square& pos, int side){
+    int file = pos%8, rank = pos/8, count = 0;
+    if(!side){
         side = -1;
     }
-    int file = pos%8, rank = pos/8, count = 0;
     for(int i = -1;i<1;i++){
         if(i==0) continue;
         if(!isValid(rank + side, file + i)) continue;
@@ -410,10 +409,8 @@ int Board::Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>& board_occupied, c
 
 //occupied funtion
 
-std::array<std::array<Pieces, 8>, 8> Board::Occupied(){
+std::array<std::array<Pieces, 8>, 8> Board::Occupied(int side){
     std::array<std::array<Pieces, 8>, 8> board_occupied;
-    int side = 0;
-    if(sideToMove == BLACK) side = 1;
     board_occupied = board;
     for(int i = 0;i<8;i++){
         for(int j = 0;j<8;j++){
@@ -421,7 +418,7 @@ std::array<std::array<Pieces, 8>, 8> Board::Occupied(){
                 Square pos = (Square)(i*8+j);
                 switch(board[i][j]){
                     case WPAWN:
-                        Occupied_Pawn(board_occupied, pos);
+                        Occupied_Pawn(board_occupied, pos, side);
                         break;
                     case WROOK:
                         Occupied_Rook(board_occupied, pos);
@@ -444,7 +441,7 @@ std::array<std::array<Pieces, 8>, 8> Board::Occupied(){
                 Square pos = (Square)(i*8+j);
                 switch(board[i][j]){
                     case BPAWN:
-                        Occupied_Pawn(board_occupied, pos);
+                        Occupied_Pawn(board_occupied, pos, side);
                         break;
                     case BROOK:
                         Occupied_Rook(board_occupied, pos);
@@ -480,6 +477,23 @@ std::vector<Square> Board::Attackers(const Square& pos, Color side){
 }
 
 //check funtions
+
+bool Board::isEnpassant(const Square& pos1, const Square& pos2){
+    int file1 = pos1%8, file2 = pos2%8, rank1 = pos1/8, rank2 = pos2/8;
+    if(enPassantSquare == NO_SQUARE) return false;
+    if((!isValid(rank1, file1)) || (!isValid(rank2, file2))) return false;
+    if(rank1 != rank2) return false;
+    if(file1 != file2 - 1 && file2 != file1 - 1) return false;
+    if(board[rank1][file1] == WPAWN && board[rank2][file2] == BPAWN){
+        Square index1 = (Square)((file1) + 8*(rank1+1)), index2 = (Square)((file2) + 8*(rank2-1));
+        if(enPassantSquare == index1 || enPassantSquare == index2) return true;
+    }
+    else if(board[rank1][file1] == BPAWN && board[rank2][file2] == WPAWN){
+        Square index1 = (Square)((file1) + 8*(rank1-1)), index2 = (Square)((file2) + 8*(rank2+1));
+        if(enPassantSquare == index1 || enPassantSquare == index2) return true;
+    }
+}
+
 
 bool Board::ischeck(){
     std::vector<Square> attackers;
@@ -532,8 +546,7 @@ bool Board::isstalemate(){
     }
     if(attackers.size() >= 1) return false;
 
-    std::array<std::array<Pieces, 8>, 8> board_occupied = Occupied();
-
+    std::array<std::array<Pieces, 8>, 8> board_occupied = Occupied((int)sideToMove);
 
     for(int i = -1;i<=1;i++){
         for(int j = -1;j<=1;j++){
@@ -542,7 +555,116 @@ bool Board::isstalemate(){
             if(board_occupied[rank+i][file+j] == EMPTY || board_occupied[rank+i][file+j]%2 == side) return false;
         }
     }
+
+    board_occupied = Occupied(!((int)sideToMove));
+    for(int i = 0;i<8;i++){
+        for(int j = 0;j<8;j++){
+            if(board_occupied[i][j] == WKING && sideToMove == WHITE) continue;
+            if(board_occupied[i][j] == BKING && sideToMove == BLACK) continue;
+            if(board_occupied[i][j] == OCCUPIED || board_occupied[i][j] == OCCUPIEDPIECE){
+                if(board[i][j]%2 == 0 && sideToMove == WHITE) continue;
+                if(board[i][j]%2 == 1 && sideToMove == BLACK) continue;
+                if(board[i][j] == WPAWN){
+                    if(board[i-1][j] != EMPTY) continue;
+                }
+                if(board[i][j] == BPAWN){
+                    if(board[i+1][j] != EMPTY) continue;
+                }
+                return false;
+            }
+        }
+    }
+
+    for(int i = 3;i<=4;i++){
+        for(int j = 0;j<7;j++){
+            Square index1 = Square(8*i + j), index2 = Square(8*i + j + 1);
+            if(isEnpassant(index1, index2)){
+                return false;
+            }
+        }
+    }
+
+    if(sideToMove == BLACK){
+        if(castlingRights & BLACK_KINGSIDE){
+            if(board[0][5] == EMPTY && board[0][6] == EMPTY) return false;
+        }
+        if(castlingRights & BLACK_QUEENSIDE){
+            if(board[0][1] == EMPTY && board[0][2] == EMPTY && board[0][3] == EMPTY) return false;
+        }
+    }
+    else{
+        if(castlingRights & WHITE_KINGSIDE){
+            if(board[7][5] == EMPTY && board[7][6] == EMPTY) return false;
+        }
+        if(castlingRights & WHITE_QUEENSIDE){
+            if(board[7][1] == EMPTY && board[7][2] == EMPTY && board[7][3] == EMPTY) return false;
+        }
+    }
+
     return true;
 }
+
+//Legal Move
+
+Board Board::movePiece(const Move& move){
+    Board new_board = *this;
+    if(move.isCastle){
+        if(sideToMove == WHITE){
+            
+        }
+    }
+}
+
+bool Board::isLegalMove(const Move& move){
+    if(move.isCastle && move.isEnPassant) return false;
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
+    if(!isValid(rank1, file1)) return false;
+    if(!isValid(rank2, file2)) return false;
+    if(move.isCastle){
+        if(board[rank1][file1] != WKING) 
+        if(sideToMove == WHITE && (!(castlingRights & WHITE_KINGSIDE)) && (!(castlingRights & WHITE_QUEENSIDE))) return false;
+        if(sideToMove == BLACK && (!(castlingRights & BLACK_KINGSIDE)) && (!(castlingRights & BLACK_QUEENSIDE))) return false;
+        if(sideToMove == WHITE){
+            if(rank1 != rank2) return false;
+            if(rank1 != 7) return false;
+            if(castlingRights & WHITE_KINGSIDE){
+                if(board[7][6] != EMPTY || board[7][5] != EMPTY) return false;
+                if(file2 != 6) return false;
+            }
+            else{
+                if(board[7][3] != EMPTY || board[7][2] != EMPTY || board[7][1] != EMPTY) return false;
+                if(file2 != 2) return false;
+            }
+        }
+        else{
+            if(rank1 != rank2) return false;
+            if(rank1 != 0) return false;
+            if(castlingRights & WHITE_KINGSIDE){
+                if(board[0][6] != EMPTY || board[0][5] != EMPTY) return false;
+                if(file2 != 6) return false;
+            }
+            else{
+                if(board[0][3] != EMPTY || board[0][2] != EMPTY || board[0][1] != EMPTY) return false;
+                if(file2 != 2) return false;
+            }
+        }
+    }
+    else if(move.isEnPassant){
+        if(enPassantSquare == NO_SQUARE) return false;
+        Square next1, next2;
+        if(sideToMove == WHITE){
+            next1 = Square((rank1-1)*8 + file1 + 1);
+            next2 = Square((rank1-1)*8 + file1 - 1);
+        }
+        else{
+            next1 = Square((rank1 + 1) * 8 + file1 + 1);
+            next2 = Square((rank1 + 1)*8 + file1 - 1);
+        }
+        if(enPassantSquare != next1 && enPassantSquare != next2) return false;
+    }
+
+}
+
+
 
 

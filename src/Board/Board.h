@@ -31,11 +31,9 @@ public:
 
     int Occupied_Bishop(std::array<std::array<Pieces, 8>, 8>&, const Square&);
 
-    int Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>&, const Square&);
+    int Occupied_Pawn(std::array<std::array<Pieces, 8>, 8>&, const Square&, int);
 
-    std::array<std::array<Pieces, 8>, 8> Occupied();
-
-    int AttackFromSame(std::array<std::array<Pieces,8>,8>&, const Square&);
+    std::array<std::array<Pieces, 8>, 8> Occupied(int);
 
     std::vector<Square> Attackers(const Square& pos, Color side);
 
@@ -45,11 +43,15 @@ public:
 
     bool isstalemate();
 
-    bool isLegalMove(const Move& move);
+    bool isLegalMove(const Move&);
 
-    bool isValidIndex(int row, int col);
+    bool isValidIndex(int, int);
 
-    bool isValid(int row, int col);
+    bool isValid(int, int);
+
+    bool isEnpassant(const Square&, const Square&);
+
+    Board movePiece(const Move&);
 
     //Helper Funtions
 
