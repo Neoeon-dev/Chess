@@ -128,14 +128,14 @@ std::vector<Square> Board::Plus(const Square& pos,const Color& side){
         }
     }
     if(side == BLACK){
-        if(isValid(rank, file+1) && board[rank][file-1] == WKING) attackers.push_back((Square)((rank)*8 + (file-1)));
-        if(isValid(rank, file-1) && board[rank][file+1] == WKING) attackers.push_back((Square)((rank)*8 + (file+1)));
+        if(isValid(rank, file+1) && board[rank][file+1] == WKING) attackers.push_back((Square)((rank)*8 + (file+1)));
+        if(isValid(rank, file-1) && board[rank][file-1] == WKING) attackers.push_back((Square)((rank)*8 + (file-1)));
         if(isValid(rank+1, file) && board[rank+1][file] == WKING) attackers.push_back((Square)((rank+1)*8 + (file)));
         if(isValid(rank-1, file) && board[rank-1][file] == WKING) attackers.push_back((Square)((rank-1)*8 + (file)));
     }
     else{
-        if(isValid(rank, file+1) && board[rank][file-1] == BKING) attackers.push_back((Square)((rank)*8 + (file-1)));
-        if(isValid(rank, file-1) && board[rank][file+1] == BKING) attackers.push_back((Square)((rank)*8 + (file+1)));
+        if(isValid(rank, file+1) && board[rank][file+1] == BKING) attackers.push_back((Square)((rank)*8 + (file+1)));
+        if(isValid(rank, file-1) && board[rank][file-1] == BKING) attackers.push_back((Square)((rank)*8 + (file-1)));
         if(isValid(rank+1, file) && board[rank+1][file] == BKING) attackers.push_back((Square)((rank+1)*8 + (file)));
         if(isValid(rank-1, file) && board[rank-1][file] == BKING) attackers.push_back((Square)((rank-1)*8 + (file)));
     }
@@ -188,8 +188,8 @@ Board::Board(){
     this->castlingRights = Default_Rights;
     this->enPassantSquare = NO_SQUARE;
     this->prev_move = MoveState();
-    this->BlackKing = D1;
-    this->WhiteKing = D8;
+    this->BlackKing = E1;
+    this->WhiteKing = E8;
 }
 
 Board::Board(std::array<std::array<Pieces, 8>, 8> board, Color sideToMove, CastlingRights castlingRights, Square enPassantSquare, MoveState prev_move, Square BlackKing, Square WhiteKing){
@@ -492,6 +492,7 @@ bool Board::isEnpassant(const Square& pos1, const Square& pos2){
         Square index1 = (Square)((file1) + 8*(rank1-1)), index2 = (Square)((file2) + 8*(rank2+1));
         if(enPassantSquare == index1 || enPassantSquare == index2) return true;
     }
+    return false;
 }
 
 
@@ -511,6 +512,7 @@ bool Board::ischeck(){
 
 bool Board::ischeckmate(){
     std::vector<Square> attackers;
+    std::array<std::array<Pieces, 8>, 8> board_occupied = Occupied(sideToMove);
     if(sideToMove == BLACK){
         attackers = Attackers(BlackKing, BLACK);
     }
@@ -518,8 +520,30 @@ bool Board::ischeckmate(){
         attackers = Attackers(WhiteKing, WHITE);
     }
     if(attackers.size() == 0) return false;
-    if(attackers.size() > 1) return true;
-
+    if(attackers.size() > 1){
+        int file, rank;
+        if(sideToMove == WHITE){
+            file = WhiteKing%8, rank = WhiteKing/8;
+        }
+        else{
+            file = BlackKing%8, rank = BlackKing/8;
+        }
+        for(int i = 0;i<8;i++){
+            for(int j = 0;j<8;j++){
+                if(board_occupied[i][j] == EMPTY || (board_occupied[i][j] != OCCUPIED && board_occupied[i][j] != OCCUPIEDPIECE && board_occupied[i][j]%2 != sideToMove)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    for(int i = 0;i<8;i++){
+        for(int j = 0;j<8;j++){
+            if(board_occupied[i][j] == EMPTY || (board_occupied[i][j] != OCCUPIED && board_occupied[i][j] != OCCUPIEDPIECE && board_occupied[i][j]%2 != sideToMove)){
+                return false;
+            }
+        }
+    }
     std::vector<Square> defenders;
     if(sideToMove == BLACK){
         defenders = Attackers(attackers[0], WHITE);
@@ -541,7 +565,7 @@ bool Board::isstalemate(){
     }
     else{
         attackers = Attackers(WhiteKing, WHITE);
-        file = WhiteKing%8, rank = BlackKing/8;
+        file = WhiteKing%8, rank = WhiteKing/8;
         side = 0;
     }
     if(attackers.size() >= 1) return false;
@@ -689,6 +713,7 @@ Board Board::movePiece(const Move& move){
     }
     new_board.board[rank1][file1] = EMPTY;
     new_board.board[rank2][file2] = board[rank1][file1];
+    return new_board;
 }
 
 bool Board::isLegalMove(const Move& move){

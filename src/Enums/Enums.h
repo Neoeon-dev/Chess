@@ -3,9 +3,6 @@
 #include <iostream>
 #include <array>
 
-#define cat(a, b) (a+b)
-#define sub(a, b) (a-b)
-
 
 using CastlingRights = u_int8_t;
 using Hashing = u_int64_t;
@@ -63,15 +60,5 @@ enum PieceType{
     NILL
 };
 
-std::array<std::array<Pieces, 8>, 8> Default_Board{{
-    {BROOK, BKNIGHT, BBISHOP, BQUEEN, BKING, BBISHOP, BKNIGHT, BROOK},
-    {BPAWN, BPAWN, BPAWN, BPAWN, BPAWN, BPAWN, BPAWN, BPAWN},
-    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-    {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-    {WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WPAWN},
-    {WROOK, WKNIGHT, WBISHOP, WQUEEN, WKING, WBISHOP, WKNIGHT, WROOK}
-}};
-
-CastlingRights Default_Rights = WHITE_KINGSIDE || WHITE_QUEENSIDE || BLACK_KINGSIDE || BLACK_QUEENSIDE;
+extern const std::array<std::array<Pieces, 8>, 8> Default_Board;
+extern CastlingRights Default_Rights;
