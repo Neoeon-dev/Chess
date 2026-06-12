@@ -608,11 +608,87 @@ bool Board::isstalemate(){
 
 Board Board::movePiece(const Move& move){
     Board new_board = *this;
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
     if(move.isCastle){
-        if(sideToMove == WHITE){
-            
+        if(board[rank1][file1]%2 == WHITE){
+            new_board.board[rank2][file2] = WKING;
+            new_board.board[rank1][file1] = EMPTY;
+            if(castlingRights & WHITE_KINGSIDE){
+                new_board.board[rank1][file1 + 1] = WROOK;
+                new_board.board[rank2][file2 + 1] = EMPTY;
+            }
+            else{
+                new_board.board[rank1][file1-1] = WROOK;
+                new_board.board[rank2][file2 - 2] = EMPTY;
+            }
+            new_board.castlingRights &= ~WHITE_KINGSIDE;
+            new_board.castlingRights &= ~WHITE_QUEENSIDE;
         }
+        else{
+            new_board.board[rank2][file2] = BKING;
+            new_board.board[rank1][file1] = EMPTY;
+            if(castlingRights & BLACK_KINGSIDE){
+                new_board.board[rank1][file1 + 1] = BROOK;
+                new_board.board[rank2][file2 + 1] = EMPTY;
+            }
+            else{
+                new_board.board[rank1][file1-1] = BROOK;
+                new_board.board[rank2][file2 - 2] = EMPTY;
+            }
+            new_board.castlingRights &= ~BLACK_KINGSIDE;
+            new_board.castlingRights &= ~BLACK_QUEENSIDE;
+        }
+        return new_board;
     }
+    if(move.isEnPassant){
+        new_board.board[rank1][file1] = EMPTY;
+        new_board.board[rank2][file2] = board[rank1][file1];
+        new_board.board[rank1][file2] = EMPTY; 
+    }
+    if(move.promotion != NILL){
+        switch (move.promotion)
+        {
+        case ROOK:
+            new_board.board[rank1][file1] = EMPTY;
+            if(board[rank1][file1]%2 == WHITE){
+                new_board.board[rank2][file2] = WROOK;
+            }
+            else{
+                new_board.board[rank2][file2] = BROOK;
+            }
+            break;
+        
+        case KNIGHT:
+            new_board.board[rank1][file1] = EMPTY;
+            if(board[rank1][file1]%2 == WHITE){
+                new_board.board[rank2][file2] = WKNIGHT;
+            }
+            else{
+                new_board.board[rank2][file2] = BKNIGHT;
+            }
+            break;
+        case BISHOP:
+            new_board.board[rank1][file1] = EMPTY;
+            if(board[rank1][file1]%2 == WHITE){
+                new_board.board[rank2][file2] = WBISHOP;
+            }
+            else{
+                new_board.board[rank2][file2] = BBISHOP;
+            }
+            break;
+        case QUEEN:
+            new_board.board[rank1][file1] = EMPTY;
+            if(board[rank1][file1]%2 == WHITE){
+                new_board.board[rank2][file2] = WQUEEN;
+            }
+            else{
+                new_board.board[rank2][file2] = BQUEEN;
+            }
+        }
+        return new_board;
+    }
+    new_board.board[rank1][file1] = EMPTY;
+    new_board.board[rank2][file2] = board[rank1][file1];
 }
 
 bool Board::isLegalMove(const Move& move){
@@ -620,6 +696,8 @@ bool Board::isLegalMove(const Move& move){
     int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
     if(!isValid(rank1, file1)) return false;
     if(!isValid(rank2, file2)) return false;
+    if(board[rank1][file1] == EMPTY) return false;
+    if((board[rank1][file1]%2 != sideToMove || (board[rank2][file2] != EMPTY && board[rank2][file2]%2 == sideToMove))) return false;
     if(move.isCastle){
         if(board[rank1][file1] != WKING) 
         if(sideToMove == WHITE && (!(castlingRights & WHITE_KINGSIDE)) && (!(castlingRights & WHITE_QUEENSIDE))) return false;
@@ -662,7 +740,18 @@ bool Board::isLegalMove(const Move& move){
         }
         if(enPassantSquare != next1 && enPassantSquare != next2) return false;
     }
-
+    else if(move.promotion != NILL){
+        if(sideToMove == WHITE){
+            if(rank2 - rank1 != -1) return false;
+        }
+        else{
+            if(rank2 - rank1 != 1) return false;
+        }
+        if(move.promotion == KING) return false;
+        if(board[rank2][file2] != EMPTY) return false;
+    }
+    Board new_board = movePiece(move);
+    if(new_board.ischeck()) return false;
 }
 
 
