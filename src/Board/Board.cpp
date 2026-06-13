@@ -178,7 +178,75 @@ std::vector<Square> Board::L(const Square& pos,const Color& side){
     return attackers;
 }
 
+PieceType BoardUtils::what_piece(const Pieces& piece){
+    if(piece == WPAWN || piece == BPAWN) return PAWN;
+    else if(piece == WROOK || piece == BROOK) return ROOK;
+    else if(piece == WKNIGHT || piece == BKNIGHT) return KNIGHT;
+    else if(piece == WBISHOP || piece == BBISHOP) return BISHOP;
+    else if(piece == WQUEEN || piece == BQUEEN) return QUEEN;
+    else if(piece == WKING || piece == BKING) return KING;
+    else return NILL;
+}
 
+bool BoardUtils::isChessPiece(const Pieces& piece){
+    if(piece == EMPTY || piece == OCCUPIED || piece == OCCUPIEDPIECE) return false;
+    return true;
+}
+
+bool BoardUtils::isSameColor(const Pieces& piece1, const Pieces& piece2){
+    if(!isChessPiece(piece1) || !isChessPiece(piece2)) return false;
+    if(piece1%2 == piece2%2) return true;
+}
+
+bool BoardUtils::isLegalMoveRook(const Move& move){
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
+    if(rank1 != rank2 && file1 != file2) return false;
+    return true;
+}
+
+bool BoardUtils::isLegalMoveBishop(const Move& move){
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
+    if((rank2 - rank1 != file2 - file1) && (rank2 - rank1 != file1 - file2)) return false;
+    return true;
+}
+
+bool BoardUtils::isLegalMoveKnight(const Move& move){
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
+    int index1 = mod(rank2 - rank1), index2 = mod(file2 - file1);
+    if(index1 != 2*index2 && index2 != 2*index1) return false;
+    return true;
+}
+
+bool BoardUtils::isLegalMoveQueen(const Move& move){
+    bool check1 = isLegalMoveBishop(move), check2 = isLegalMoveRook(move);
+    if(check1 || check2) return true;
+}
+
+bool BoardUtils::isLegalMoveKing(const Move& move){
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8;
+    int diff1 = mod(file2 - file1), diff2 = mod(rank2 - rank1);
+    if(diff1 != 1 && diff2 != 1 && !move.isCastle) return false;
+    if(move.isCastle){
+        if((rank1 != 0 || rank2 != 0) && (rank1 != 7 || rank2 != 7)) return false;
+        if(diff1 != 2) return false;
+    }
+    return true;
+}
+
+bool BoardUtils::isLegalMovePawn(const Move& move, const Color& side){
+    int file1 = move.from%8, rank1 = move.from/8, file2 = move.to%8, rank2 = move.to/8, diff1 = file2-file1, diff2 = rank2 - rank1;
+    if(side == WHITE){
+        if(diff2 != -1) return false;
+        if(diff1 != -1 && diff1 != -1 && diff1 != 0) return false;
+        return true;
+    }
+    else{
+        if(diff2 != 1) return false;
+        if(diff1 != -1 && diff1 != -1 && diff1 != 0) return false;
+        return true;
+    }
+    return false;
+}
 
 //Constructors Definition
 
@@ -776,6 +844,35 @@ bool Board::isLegalMove(const Move& move){
         if(board[rank2][file2] != EMPTY) return false;
     }
     Board new_board = movePiece(move);
+    switch (BoardUtils::what_piece(board[file1][rank1]))
+    {
+    case ROOK:
+        if(!BoardUtils::isLegalMoveRook(move)) return false;
+        break;
+    
+    case BISHOP:
+        if(!BoardUtils::isLegalMoveBishop(move)) return false;
+        break;
+    
+    case KNIGHT:
+        if(!BoardUtils::isLegalMoveKnight(move)) return false;
+        break;
+
+    case QUEEN:
+        if(!BoardUtils::isLegalMoveQueen(move)) return false;
+        break;
+    
+    case KING:
+        if(!BoardUtils::isLegalMoveKing(move)) return false;
+        break;
+
+    case PAWN:
+        if(!BoardUtils::isLegalMovePawn(move, sideToMove)) return false;
+        break;
+    
+    default:
+        break;
+    }
     if(new_board.ischeck()) return false;
     return true;
 }
