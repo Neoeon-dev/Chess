@@ -877,6 +877,51 @@ bool Board::isLegalMove(const Move& move){
     return true;
 }
 
+//Generate Move functions
 
+std::vector<Move> Board::generateMovesBishop(const Square& pos){
+    std::vector<Move> moves;
+    int file = pos%8, rank = pos/8, count = 0, URlimit = (rank > file)?(8-rank):(8-file), LLlimit = (rank > file)?file:rank, ULlimit = (rank + file < 8)?file: (8 - rank), LRlimit = (rank+file < 8)?rank:(8-file);
+    for(int i = 1;i<URlimit;i++){
+        if(!isValid(rank+i, file+i)) continue;
+        if(isValidIndex(rank+i, file+i)){
+            count++;
+        }
+        if(BoardUtils::isChessPiece(board[rank+i][file+i])){
+            if(!BoardUtils::isSameColor(board[rank+i][file+i], board[rank][file])){
+            }
+            break;
+        }
+    }
+    for(int i = 1;i<=LLlimit;i++){
+        if(!isValid(rank-i, file-i)) continue;
+        if(isValidIndex(rank-i, file-i)){
+            count++;
+        }
+        if(board[rank-i][file-i] != EMPTY && board[rank-i][file-i] != OCCUPIED){
+            break;
+        }
+    }
+    for(int i = 1;i<=ULlimit;i++){
+        if(!isValid(rank+i, file-i)) continue;
+        if(isValidIndex(rank+i, file-i)){
+            count++;
+        }
+        if(board[rank+i][file-i] != EMPTY && board[rank+i][file-i] != OCCUPIED){
+            break;
+        }
+    }
+    for(int i = 1;i <= LRlimit;i++){
+        if(!isValid(rank-i, file+i)) continue;
+        if(isValidIndex(rank-i, file+i)){
+            count++;
+        }
+        if(board[rank-i][file+i] != EMPTY && board[rank-i][file+i] != OCCUPIED){
+            break;
+        }
+    }
+}
 
+std::vector<Move> Board::generateMovesPiece(const Square& pos){
 
+}
